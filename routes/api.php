@@ -36,12 +36,12 @@ Route::middleware('auth:api')->group(function(){
     
 
     //Livro de ocorrencias
-    Route::post('/warnings', [WarningController::class, 'getWarnings']);
+    Route::get('/warnings', [WarningController::class, 'getWarnings']);
     Route::post('/warning', [WarningController::class, 'setWarning']);
     Route::post('/warning/file', [WarningController::class, 'addWarningFile']);
 
     //Boletos
-    Route::post('/billets', [BilletController::class, 'getAll']);
+    Route::get('/billets', [BilletController::class, 'getAll']);
 
     //Achados e Perdidos
     Route::get('/foundandlost', [FoundAndLostController::class, 'getAll']);
@@ -67,5 +67,43 @@ Route::middleware('auth:api')->group(function(){
     Route::get('/reservations/{id}/times',[ReservationController::class, 'getTimes']);
 
     Route::get('/myreservations',[ReservationController::class, 'getMyReservations']);
-    Route::delete('/myreservation/{id}',[ReservationController::class, 'delMyReservations']);
+    Route::delete('/myreservation/{id}',[ReservationController::class, 'delMyReservations']);    
+});
+
+//Sistema Web
+Route::prefix('admin')->group(function () { 
+    Route::post('/auth/login',[AuthController::class, 'loginWeb']);
+    Route::post('/auth/register',[AuthController::class, 'registerWeb']);
+
+    Route::middleware('auth:api')->group(function(){
+        Route::post('/auth/validate', [AuthController::class, 'validateTokenWeb']);
+        Route::post('/auth/logout', [AuthController::class, 'logout']);
+
+        //Mural de avisos
+        Route::get('/walls', [WallController::class, 'getAll']); 
+        Route::post('/wall', [WallController::class, 'AddWall']);
+        Route::put('/wall/{id}', [WallController::class, 'UpdeteWall']);
+        Route::delete('/wall/{id}', [WallController::class, 'RemoveWall']);
+
+        //Boletos
+        Route::get('/billets', [BilletController::class, 'getBillets']);
+        Route::post('/billet', [BilletController::class, 'AddBillet']);
+        Route::put('/billet/{id}', [BilletController::class, 'UpdateBillet']);
+        Route::delete('/billet/{id}', [BilletController::class, 'RemoveBillet']);
+
+        //Documentos
+        Route::get('/docs', [DocController::class, 'getAll']);
+        Route::post('/doc', [DocController::class, 'AddDoc']);
+        Route::post('/doc/{id}', [DocController::class, 'UpdateDoc']);
+        Route::delete('/doc/{id}', [DocController::class, 'RemoveDoc']);
+
+        //Areas
+        Route::get('/areas', [ReservationController::class, 'getAreas']);
+        Route::post('/area', [ReservationController::class, 'AddArea']);
+        Route::post('/area/{id}', [ReservationController::class, 'UpdateArea']);
+        Route::post('/area/{id}/disabled', [ReservationController::class, 'DisabledArea']);
+        Route::delete('/area/{id}', [ReservationController::class, 'RemoveArea']);
+        Route::get('/area/{id}/disableddates',[ReservationController::class, 'getDisabledDates']);
+        Route::post('/area/{id}/disableddates',[ReservationController::class, 'setDisabledDates']);
+    });
 });

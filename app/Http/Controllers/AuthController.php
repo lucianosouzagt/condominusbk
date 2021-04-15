@@ -133,4 +133,88 @@ class AuthController extends Controller
 
         return $array;
     }
+
+    public function registerWeb(Request $request){
+        $array = ['error'=> ''];
+
+        $validator = Validator::make($request->all(), [
+            'name'=> 'required',
+            'email'=> 'required|email|unique:users,email',
+            'cpf'=> 'required|digits:11|unique:users,cpf',
+            'password'=> 'required',
+            'password_confirm'=> 'required|same:password'
+        ]);
+
+        if(!$validator->fails()){
+            $name = $request->input('name');
+            $email = $request->input('email');
+            $cpf = $request->input('cpf');
+            $password = $request->input('password');
+
+            $hash = password_hash($password, PASSWORD_DEFAULT);
+
+            $newUser = new User();
+            $newUser->name = $name;
+            $newUser->email = $email;
+            $newUser->cpf = $cpf;
+            $newUser->password = $hash;
+            $newUser->type = 1;
+            $newUser->save();
+            $array['user'] = $newUser;
+        }else{
+            $array['error'] = $validator->errors()->first();
+            return $array;
+        }
+        return $array;
+    }
+
+    public function loginWeb(Request $request){
+        $array = ['error' => ''];
+        
+        $validator = Validator::make($request->all(), [
+            'email'=> 'required',
+            'password'=> 'required'
+        ]);
+
+        if(!$validator->fails()){
+            $email = $request->input('email');
+            $password = $request->input('password');
+
+            $token = auth()->attempt([
+                'email' => $email,
+                'password' => $password,
+            ]);
+            
+
+            if(!$token){
+                $array['error'] = 'E-mail e/ou Senha estão errados.';
+                return $array;
+            }
+
+            $user = auth()->user();
+            
+            if($user['type'] == 0){
+                $array['error'] = 'Você não e um adiministrador.';
+                return $array;
+            }
+            $array['token'] = $token;
+            $array['user'] = $user;
+            
+
+            
+        }else{
+            $array['error'] = $validator->errors()->first();
+            return $array;
+        }
+        return $array;
+    }
+
+    public function validateTokenWeb(Request $request){
+        $array = ['error'=>''];
+
+        $user = auth()->user();
+        $array['user'] = $user;
+
+        return $array;
+    }
 }

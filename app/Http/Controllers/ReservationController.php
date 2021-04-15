@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 use App\Models\Area;
@@ -345,6 +346,144 @@ class ReservationController extends Controller
         }
 
         return $array;
+    }
+
+    public function getAreas(Request $request){
+        $array = ['error'=>''];
+            
+        $areas = Area::orderBy('title')->get();
+
+        foreach($areas as $areaKey =>$areaValue){
+            $areas[$areaKey]['cover'] = asset('storage/areas/'.$areaValue['cover']);
+        }
+        $array['list'] = $areas;
+
+       
+        return $array;
+    }
+
+    public function AddArea(Request $request){
+        $array = ['error'=>''];
+            
+        $validator = Validator::make($request->all(),[
+            'title'=> 'required',
+            'cover'=>'required|file|mimes:png,jpg,jpeg',
+            'days'=>'required',
+            'start_time'=>'required|date_format:H:i:s',
+            'end_time'=> 'required|date_format:H:i:s',
+        ]);
+        
+        if (!$validator->fails()) {
+            $title = $request->input('title');
+            $file = $request->file('cover')->store('public/areas');
+            $file = explode('public/areas/', $file);
+            $cover = $file[1];
+            $days = $request->input('days');
+            $start_time = $request->input('start_time');
+            $end_time = $request->input('end_time');
+
+            $newArea = new Area();
+            $newArea->title = $title;
+            $newArea->cover = $cover;
+            $newArea->days = $days;
+            $newArea->start_time = $start_time;
+            $newArea->end_time = $end_time;
+            $newArea->datecreated = now();
+            $newArea->save();
+
+            
+        }else{
+            $array['error'] = $validator->errors()->first();
+            return $array;
+        }
+
+       
+        return $array;
+    }
+
+    public function UpdateArea(Request $request, $id){
+        $array = ['error'=>'', 'cover'=>''];
+            
+        if($request->file('cover')){
+            $validator = Validator::make($request->all(),[
+                'title'=> 'required',
+                'cover'=>'required|file|mimes:png,jpg,jpeg',
+                'days'=>'required',
+                'start_time'=>'required|date_format:H:i:s',
+                'end_time'=> 'required|date_format:H:i:s',
+            ]);
+        }else{
+            $validator = Validator::make($request->all(),[
+                'title'=> 'required',
+                'days'=>'required',
+                'start_time'=>'required|date_format:H:i:s',
+                'end_time'=> 'required|date_format:H:i:s',
+            ]);
+        }        
+        if (!$validator->fails()) {
+            $title = $request->input('title');
+            $days = $request->input('days');
+            $start_time = $request->input('start_time');
+            $end_time = $request->input('end_time');
+            if($request->file('cover')){
+                $file = $request->file('cover')->store('public/areas');
+                $file = explode('public/areas/', $file);
+                $cover = $file[1];
+
+                $newArea = Area::find($id);
+                Storage::delete('areas/' + $newArea['cover']);
+                $array['cover'] = $newArea['cover'];
+                $newArea->title = $title;
+                $newArea->cover = $cover;
+                $newArea->days = $days;
+                $newArea->start_time = $start_time;
+                $newArea->end_time = $end_time;
+                $newArea->datecreated = now();
+                $newArea->save();
+            }else{
+                $newArea = Area::find($id);
+                $newArea->title = $title;
+                $newArea->days = $days;
+                $newArea->start_time = $start_time;
+                $newArea->end_time = $end_time;
+                $newArea->datecreated = now();
+                $newArea->save();
+            }
+
+        }else{
+            $array['error'] = $validator->errors()->first();
+            return $array;
+        }
+       
+        return $array;
+    }
+
+    public function DisabledArea($id){
+        $array = ['error'=>''];
+
+        $area = Area::find($id);
+        if($area){
+            if($area['allowed'] == 0){
+                $area->allowed = 1;
+            }else{
+                $area->allowed = 0;
+            }
+            $area->save();
+        }else{
+            $array['error'] = 'Area não existe.';
+            return $array;
+        }
+        return $array;
+    }
+
+    public function RemoveArea($id){
+        $array = ['error'=>''];
+        
+        $area = Area::find($id);
+        $area->delete();
+
+        return $array;  
+
     }
 }
 

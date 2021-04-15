@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 use App\Models\User;
 use App\Models\Wall;
@@ -63,6 +64,60 @@ class WallController extends Controller
         }
         $array['likes'] = WallLike::where('id_wall', $id)->count();
         return $array;
+    }
+
+    public function AddWall(Request $request){
+        $array = ['error'=>''];
+
+        $title = $request->input('title');
+        $body = $request->input('body');
+
+        $validator = Validator::make($request->all(), [
+            'title'=> 'required',
+            'body'=> 'required'
+        ]);
+
+        if(!$validator->fails()){
+            $wall = new Wall();
+            $wall->title = $title;
+            $wall->body = $body;
+            $wall->datecreated = now();
+            $wall->save();
+
+            $array['wall'] = $wall;
+        }else{
+            $array['error'] = $validator->errors()->first();
+            return $array;
+        }     
+
+        return $array;   
+    }
+
+    public function UpdeteWall(Request $request, $id){
+        $array = ['error'=>''];
+
+        $title = $request->input('title');
+        $body = $request->input('body');
+
+
+        $wall = Wall::find($id);
+        $wall->title = $title;
+        $wall->body = $body;
+        $wall->save();
+
+        $array['wall'] = $wall;
+        return $array;  
+
+    }    
+
+    public function RemoveWall($id){
+        $array = ['error'=>''];
+        
+        $wall = Wall::find($id);
+        $wall->delete();
+
+        return $array;  
+
     }
 
 }

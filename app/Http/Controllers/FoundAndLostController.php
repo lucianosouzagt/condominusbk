@@ -40,7 +40,7 @@ class FoundAndLostController extends Controller
     }
 
     public function insert(Request $request){
-        $array = ['error'=>''];
+        $array = ['error'=>'', 'photo'=>[]];
 
         
         $validator = Validator::make($request->all(),[
@@ -48,7 +48,8 @@ class FoundAndLostController extends Controller
             'where'=> 'required',
             'photo'=>'required|file|mimes:jpg,png,jpeg'
         ]);
-
+        
+        $array['photo'] = $request->file('photo');
         if (!$validator->fails()) {
             $description = $request->input('description');
             $where = $request->input('where');
