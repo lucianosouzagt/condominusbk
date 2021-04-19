@@ -108,4 +108,30 @@ class WarningController extends Controller
 
         return $array;
     }
+    
+    public function getWebWarnings(Request $request){
+        $array = ['error'=>''];
+   
+        $warnings = Warning::join('units','units.id','warnings.id_unit')
+                             ->select('warnings.*','units.name as unit_name')
+                             ->orderBy('datecreated','DESC')
+                             ->orderBy('id','DESC')
+                             ->get();
+
+        foreach($warnings as $warnKey => $warnValue) {
+            $warnings[$warnKey]['datecreated_formate'] = date('d/m/Y H:i:s', strtotime($warnValue['datecreated']));
+            $photolist = [];
+            $photos = explode(',', $warnValue['photos']);                                       
+            foreach($photos as $photo) {
+                if(!empty($photo)) {
+                    $photolist[] = asset('storage/'.$photo); 
+                }
+            }                   
+
+            $warnings[$warnKey]['photos'] = $photolist;
+        }
+
+        $array['list'] = $warnings;
+        return $array;
+    }
 }

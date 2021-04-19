@@ -151,6 +151,17 @@ class UnitController extends Controller
             $array['error'] = $validator->errors()->first();
         }
         return $array;
-    }  
+    } 
+
+    public function getUnits(){
+        $array = ['error'=>''];
+
+        $units = Unit::get();
+        
+        $array['list'] = $units;
+        
+        
+        return $array;
+    } 
 }
 

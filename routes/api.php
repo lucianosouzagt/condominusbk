@@ -88,7 +88,7 @@ Route::prefix('admin')->group(function () {
         //Boletos
         Route::get('/billets', [BilletController::class, 'getBillets']);
         Route::post('/billet', [BilletController::class, 'AddBillet']);
-        Route::put('/billet/{id}', [BilletController::class, 'UpdateBillet']);
+        Route::post('/billet/{id}', [BilletController::class, 'UpdateBillet']);
         Route::delete('/billet/{id}', [BilletController::class, 'RemoveBillet']);
 
         //Documentos
@@ -105,5 +105,27 @@ Route::prefix('admin')->group(function () {
         Route::delete('/area/{id}', [ReservationController::class, 'RemoveArea']);
         Route::get('/area/{id}/disableddates',[ReservationController::class, 'getDisabledDates']);
         Route::post('/area/{id}/disableddates',[ReservationController::class, 'setDisabledDates']);
+
+        //Reservas
+        Route::get('/reservations',[ReservationController::class, 'getAllReservations']);
+        Route::post('/reservation',[ReservationController::class, 'setWebReservation']);
+        Route::put('/reservation/{id}',[ReservationController::class, 'updateReservation']);
+        Route::delete('/reservation/{id}',[ReservationController::class, 'deleteReservation']);
+    
+        //Unidades
+        Route::get('/units', [UnitController::class, 'getUnits']);
+
+        //Achados e Perdidos
+        Route::get('/foundandlost', [FoundAndLostController::class, 'getFoundAndLost']);
+        Route::post('/foundandlost', [FoundAndLostController::class, 'setFoundAndLost']);
+        Route::put('/foundandlost/{id}', [FoundAndLostController::class, 'doneFoundAndLost']);
+        Route::post('/foundandlost/{id}', [FoundAndLostController::class, 'updateFoundAndLost']);
+        Route::delete('/foundandlost/{id}', [FoundAndLostController::class, 'deleteFoundAndLost']);
+
+        //Livro de ocorrencias
+        Route::get('/warnings', [WarningController::class, 'getWebWarnings']);
+        Route::post('/warning', [WarningController::class, 'setWarning']);
+        Route::post('/warning/file', [WarningController::class, 'addWarningFile']);
+
     });
 });

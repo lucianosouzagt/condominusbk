@@ -44,7 +44,7 @@ class BilletController extends Controller
     public function getBillets(Request $request){
         $array = ['error'=>''];
         
-        $billets = Billet::orderBy('datecreated', 'desc')->get();
+        $billets = Billet::join('units','units.id','billets.id_unit')->select('billets.*','units.name')->orderBy('datecreated', 'desc')->get();
 
         foreach($billets as $billetKey =>$billetValue){
             $billets[$billetKey]['fileurl'] = asset('storage/billets/'.$billetValue['fileurl']);
